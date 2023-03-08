@@ -8,17 +8,17 @@ import java.util.Scanner;
 public class MazeSolver {
 
 	char[][] maze; // 2D maze array
-	paramaters param = new paramaters();
-	position pos = new position();
+	Paramaters param = new Paramaters();
+	Position pos = new Position();
 
-	LinkedList<position> stack = new LinkedList<>(); // Stack
+	LinkedList<Position> stack = new LinkedList<>(); // Stack
 
 	/*
 	 * The paramaters object stores the x and y coordinates of the start location,
 	 * and contains the dimensions of the maze for out of bounds checking.
 	 */
 
-	static class paramaters {
+	static class Paramaters {
 		int x;
 		int y;
 		int rows;
@@ -39,7 +39,7 @@ public class MazeSolver {
 	 * that has been made.
 	 */
 
-	static class position {
+	static class Position {
 		int x;
 		int y;
 		int rows;
@@ -123,10 +123,11 @@ public class MazeSolver {
 
 	public void solveMaze() {
 
+		
 		pos.EAST();
-		stack.push(pos);
-
-		if (maze[pos.x][pos.y] == '.') {
+		System.out.println(pos.x + " " + pos.y);
+		
+		if (maze[pos.y][pos.x] == '.') {
 			System.out.println("MOVING EAST, NEW COORDS ARE : " + pos.x + " + " + pos.y);
 			solveMaze();
 		} else if (maze[pos.x][pos.y] == '#') {
