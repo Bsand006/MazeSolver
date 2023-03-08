@@ -116,24 +116,29 @@ public class MazeSolver {
 				}
 			}
 		}
-		
+
 		pos.setup(param.x, param.y, param.rows, param.cols);
 		solveMaze();
 	}
 
 	public void solveMaze() {
 
-		
 		pos.EAST();
 		System.out.println(pos.x + " " + pos.y);
-		
-		if (maze[pos.y][pos.x] == '.') {
-			System.out.println("MOVING EAST, NEW COORDS ARE : " + pos.x + " + " + pos.y);
-			solveMaze();
-		} else if (maze[pos.x][pos.y] == '#') {
-			System.out.println("INVALID SQUARE");
-		}
 
+		if (pos.y < pos.cols - 1 || pos.x < pos.rows - 1) {
+
+			if (maze[pos.y][pos.x] == '.') {
+				System.out.println("MOVING EAST, NEW COORDS ARE : " + pos.x + " + " + pos.y);
+				solveMaze();
+			} else if (maze[pos.x][pos.y] == '#') {
+				System.out.println("INVALID SQUARE");
+
+			}
+		} else if (pos.y == pos.cols || pos.x == pos.rows) {
+			System.out.println("OUT OF BOUNDS!");
+			
+		}
 	}
 
 	public static void main(String[] args) {
