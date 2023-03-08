@@ -9,7 +9,6 @@ public class MazeSolver {
 
 	char[][] maze; // 2D maze array
 	Paramaters param = new Paramaters();
-	Position pos = new Position();
 
 	LinkedList<Position> stack = new LinkedList<>(); // Stack
 
@@ -44,6 +43,10 @@ public class MazeSolver {
 		int y;
 		int rows;
 		int cols;
+		boolean movedEast;
+		boolean movedWest;
+		boolean movedSouth;
+		boolean movedNorth;
 
 		public void setup(int x, int y, int rows, int cols) {
 			this.x = x;
@@ -55,29 +58,29 @@ public class MazeSolver {
 		public void EAST() {
 			if (x < cols) {
 				x++;
-			} else
-				System.out.println("EAST OUT OF BOUNDS");
+				movedEast = true;
+			}
 		}
 
 		public void WEST() {
-			if (x > 0)
+			if (x > 0) {
 				x--;
-			else
-				System.out.println("WEST OUT OF BOUNDS");
+				movedWest = true;
+			}
 		}
 
 		public void NORTH() {
-			if (y > 0)
+			if (y > 0) {
 				y--;
-			else
-				System.out.println("NORTH OUT OF BOUNDS");
+				movedNorth = true;
+			}
 		}
 
 		public void SOUTH() {
-			if (y < rows)
+			if (y < rows) {
 				y++;
-			else
-				System.out.println("SOUTH OUT OF BOUNDS");
+				movedSouth = true;
+			}
 		}
 	}
 
@@ -117,28 +120,62 @@ public class MazeSolver {
 			}
 		}
 
-		pos.setup(param.x, param.y, param.rows, param.cols);
-		solveMaze();
+		solveMaze(param.x, param.y);
 	}
 
-	public void solveMaze() {
+	public boolean solveMaze(int x, int y) {
 
-		pos.EAST();
-		System.out.println(pos.x + " " + pos.y);
+		Position pos = new Position();
+		pos.setup(x, y, param.rows, param.cols);
 
-		if (pos.y < pos.cols - 1 || pos.x < pos.rows - 1) {
+		if (maze[y][x] == '@') {
+			System.out.println("MAZE SOLVED!");
+			return true;
+		}
 
-			if (maze[pos.y][pos.x] == '.') {
-				System.out.println("MOVING EAST, NEW COORDS ARE : " + pos.x + " + " + pos.y);
-				solveMaze();
-			} else if (maze[pos.x][pos.y] == '#') {
-				System.out.println("INVALID SQUARE");
+		if (y < pos.cols - 1 && x < pos.rows - 1) {
+
+			pos.EAST();
+			x = pos.x;
+			y = pos.y;
+
+			if (maze[y][x] == '.') {
+				System.out.println("MOVING EAST, NEW COORDS ARE : " + x + " + " + y);
+				stack.push(pos);
+				solveMaze(x, y);
+
+			} else if (maze[y][x] == '#') {
+				System.out.println("INVALID SQUARE, CHECKING SOUTH");
+				pos.SOUTH();
+				x = pos.x;
+				y = pos.y;
+
+				if (maze[y][x] == '.') {
+					System.out.println("MOVING SOUTH, NEW COORDS ARE : " + x + " + " + y);
+					solveMaze(x, y);
+
+				} else if (maze[y][x] == '#') {
+					System.out.println("INVALID SQUARE, CHECKING NORTH");
+					pos.NORTH();
+					x = pos.x;
+					y = pos.y;
+
+					if (maze[y][x] == '.') {
+						System.out.println("MOVING NORTH, NEW COORDS ARE : " + x + " + " + y);
+						solveMaze(x, y);
+
+					} else if (maze[y][x] == '#') {
+						System.out.println("DEAD END! BACKTRACKING...");
+					}
+				}
 
 			}
-		} else if (pos.y == pos.cols || pos.x == pos.rows) {
+
+		} else {
 			System.out.println("OUT OF BOUNDS!");
-			
 		}
+
+		return false;
 	}
 
 	public static void main(String[] args) {
