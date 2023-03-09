@@ -1,4 +1,4 @@
-package com.briansand.mazesolver;
+package main.java.com.briansand.mazesolver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,7 @@ public class MazeSolver {
 
 	Position[][] maze;
 	Paramaters param = new Paramaters();
+	int turns = 0;
 
 	LinkedList<Position> stack = new LinkedList<>(); // Stack
 
@@ -102,7 +103,7 @@ public class MazeSolver {
 			cols = line.length();
 		}
 
-        System.out.println("Making " + rows + "," + cols + " maze");
+		System.out.println("Making " + rows + "," + cols + " maze");
 		maze = new Position[rows][cols]; // maze array
 
 		file = new Scanner(new File("maze.txt")); // Resets the scanner
@@ -115,14 +116,14 @@ public class MazeSolver {
 				if (thisRow.charAt(j) == '$') {
 					maze[i][j].state = 0;
 					param.setup(i, j, rows, cols); // Passes start value data into Paramaters
-					System.out.println("Starting position " + i + "," + j);					
+					System.out.println("Starting position " + i + "," + j);
 				} else if (thisRow.charAt(j) == '.') {
 					maze[i][j].state = 1;
 				} else if (thisRow.charAt(j) == '#') {
 					maze[i][j].state = 2;
 				} else if (thisRow.charAt(j) == '@') {
 					maze[i][j].state = 3;
-                    System.out.println("Ending position " + i + "," + j);                 
+					System.out.println("Ending position " + i + "," + j);
 				}
 			}
 		}
@@ -142,50 +143,61 @@ public class MazeSolver {
 	 */
 	public boolean solveMaze(int x, int y) {
 		Position pos = new Position(); // Creates new Postion object
+	
 		pos.setup(x, y, param.rows, param.cols); // Sets values of pos
 
-		// Win condition check
-		if (maze[y][x].state == 3) {
-			System.out.println("MAZE SOLVED!");
-			return true;
-		}
-
 		// EAST
-		if (x < pos.cols - 1 && maze[y][x + 1].state == 2) {
+		if (x < pos.cols - 1 && maze[y][x + 1].state == 1) {
 			pos.EAST();
 			x = pos.x;
 			y = pos.y;
+			maze[y][x].state = 4;
 			System.out.println("MOVING EAST... COORDS ARE : " + x + " + " + y);
+			turns++;
 			stack.push(pos);
 			solveMaze(x, y);
 
 			// WEST
-		} else if (x > 0 && maze[y][x - 1].state == 2) {
+		} else if (x > 0 && maze[y][x - 1].state == 1) {
 			pos.WEST();
 			x = pos.x;
 			y = pos.y;
+			maze[y][x].state = 4;
 			System.out.println("MOVING WEST... COORDS ARE : " + x + " + " + y);
+			turns++;
 			stack.push(pos);
 			solveMaze(x, y);
 
 			// SOUTH
-		} else if (y < pos.rows - 1 && maze[y + 1][x].state == 2) {
+		} else if (y < pos.rows - 1 && maze[y + 1][x].state == 1) {
 			pos.SOUTH();
 			x = pos.x;
 			y = pos.y;
+			maze[y][x].state = 4;
 			System.out.println("MOVING SOUTH... COORDS ARE : " + x + " + " + y);
+			turns++;
 			stack.push(pos);
 			solveMaze(x, y);
 
 			// NORTH
-		} else if (y > 0 && maze[y - 1][x].state == 2) {
+		} else if (y > 0 && maze[y - 1][x].state == 1) {
 			pos.NORTH();
 			x = pos.x;
 			y = pos.y;
+			maze[y][x].state = 4;
 			System.out.println("MOVING NORTH... COORDS ARE : " + x + " + " + y);
+			turns++;
 			stack.push(pos);
 			solveMaze(x, y);
 
+			// Win condition check
+		} else if (x < pos.cols - 1 && x > 0 && y < pos.rows - 1 && y > 0) {
+			if (maze[y][x - 1].state == 3 || maze[y][x + 1].state == 3 || maze[y - 1][x].state == 3
+					|| maze[y + 1][x].state == 3) {
+				System.out.println("MAZE SOLVED!");
+				System.out.println("SOLVED IN " + turns + " TURNS");
+				return true;
+			}
 		} else {
 			System.out.println("DEAD END! BACKTRACKING...");
 		}
