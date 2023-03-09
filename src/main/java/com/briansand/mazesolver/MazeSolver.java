@@ -1,4 +1,4 @@
-package main.java.com.briansand.mazesolver;
+package com.briansand.mazesolver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +12,7 @@ public class MazeSolver {
 
 	LinkedList<Position> stack = new LinkedList<>(); // Stack
 
-	/*
+	/**
 	 * The paramaters object stores the x and y coordinates of the start location,
 	 * and contains the dimensions of the maze for out of bounds checking.
 	 */
@@ -30,13 +30,12 @@ public class MazeSolver {
 		}
 	}
 
-	/*
+	/**
 	 * The position object stores the current coordinates that the game is on. Every
 	 * time the game moves to a new space a new object of this class will be
 	 * created, updated, and then pushed onto the stack to keep track of every move
 	 * that has been made.
 	 */
-
 	static class Position {
 		int x;
 		int y;
@@ -77,7 +76,7 @@ public class MazeSolver {
 		}
 	}
 
-	/*
+	/**
 	 * mazeLoader creates the 2D array. The maze array is a maze of Position
 	 * objects. Creating the maze in this way allows me to store more information in
 	 * a cell. I can store what the that cell is, and more importantly I can store
@@ -103,28 +102,27 @@ public class MazeSolver {
 			cols = line.length();
 		}
 
+        System.out.println("Making " + rows + "," + cols + " maze");
 		maze = new Position[rows][cols]; // maze array
 
 		file = new Scanner(new File("maze.txt")); // Resets the scanner
 
-		/*
-		 * This loop initializes every cell in the maze and sets the proper state value
-		 */
-
+		// This loop initializes every cell in the maze and sets the proper state value
 		for (int i = 0; i < rows; i++) {
 			String thisRow = file.next();
 			for (int j = 0; j < cols; j++) {
-
 				maze[i][j] = new Position();
-				if (thisRow.equals("$")) {
+				if (thisRow.charAt(j) == '$') {
 					maze[i][j].state = 0;
 					param.setup(i, j, rows, cols); // Passes start value data into Paramaters
-				} else if (thisRow.equals(".")) {
+					System.out.println("Starting position " + i + "," + j);					
+				} else if (thisRow.charAt(j) == '.') {
 					maze[i][j].state = 1;
-				} else if (thisRow.equals("#")) {
+				} else if (thisRow.charAt(j) == '#') {
 					maze[i][j].state = 2;
-				} else if (thisRow.equals("@")) {
+				} else if (thisRow.charAt(j) == '@') {
 					maze[i][j].state = 3;
+                    System.out.println("Ending position " + i + "," + j);                 
 				}
 			}
 		}
@@ -133,7 +131,7 @@ public class MazeSolver {
 		solveMaze(param.x, param.y);
 	}
 
-	/*
+	/**
 	 * solveMaze is the actual recursion solve method. It works by creating a new
 	 * Position object. The program then will check all directions until it finds a
 	 * valid move. I then sets the x and y coords of that point into the x and y
@@ -142,7 +140,6 @@ public class MazeSolver {
 	 * because a new blank Position object is created each time it runs, so the
 	 * current x and y coords need to be tracked seperately.
 	 */
-
 	public boolean solveMaze(int x, int y) {
 		Position pos = new Position(); // Creates new Postion object
 		pos.setup(x, y, param.rows, param.cols); // Sets values of pos
