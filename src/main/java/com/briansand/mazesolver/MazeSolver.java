@@ -1,4 +1,4 @@
-package com.briansand.mazesolver;
+package main.java.com.briansand.mazesolver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,177 +6,201 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class MazeSolver {
-    char[][]   maze;                    // 2D maze array
-    Paramaters param = new Paramaters();
 
-    LinkedList<Position> stack = new LinkedList<>(); // Stack
+	Position[][] maze;
+	Paramaters param = new Paramaters();
 
-    /**
-     * The paramaters object stores the x and y coordinates of the start location,
-     * and contains the dimensions of the maze for out of bounds checking.
-     */
-    static class Paramaters {
-        int x;
-        int y;
-        int rows;
-        int cols;
+	LinkedList<Position> stack = new LinkedList<>(); // Stack
 
-        public void setup(int x, int y, int rows, int cols) {
-            this.x = x;
-            this.y = y;
-            this.rows = rows;
-            this.cols = cols;
-        }
-    }
+	/*
+	 * The paramaters object stores the x and y coordinates of the start location,
+	 * and contains the dimensions of the maze for out of bounds checking.
+	 */
+	static class Paramaters {
+		int x;
+		int y;
+		int rows;
+		int cols;
 
-    /**
-     * The position object stores the current coordinates that the game is on. Every
-     * time the game moves to a new space a new object of this class will be
-     * created, updated, and then pushed onto the stack to keep track of every move
-     * that has been made.
-     */
-    static class Position {
-        int     x;
-        int     y;
-        int     rows;
-        int     cols;
-        boolean movedEast;
-        boolean movedWest;
-        boolean movedSouth;
-        boolean movedNorth;
+		public void setup(int x, int y, int rows, int cols) {
+			this.x = x;
+			this.y = y;
+			this.rows = rows;
+			this.cols = cols;
+		}
+	}
 
-        public void setup(int x, int y, int rows, int cols) {
-            this.x = x;
-            this.y = y;
-            this.rows = rows;
-            this.cols = cols;
-        }
+	/*
+	 * The position object stores the current coordinates that the game is on. Every
+	 * time the game moves to a new space a new object of this class will be
+	 * created, updated, and then pushed onto the stack to keep track of every move
+	 * that has been made.
+	 */
 
-        public void EAST() {
-            if (x < cols) {
-                x++;
-                movedEast = true;
-            }
-        }
+	static class Position {
+		int x;
+		int y;
+		int rows;
+		int cols;
 
-        public void WEST() {
-            if (x > 0) {
-                x--;
-                movedWest = true;
-            }
-        }
+		int state;
 
-        public void NORTH() {
-            if (y > 0) {
-                y--;
-                movedNorth = true;
-            }
-        }
+		public void setup(int x, int y, int rows, int cols) {
+			this.x = x;
+			this.y = y;
+			this.rows = rows;
+			this.cols = cols;
+		}
 
-        public void SOUTH() {
-            if (y < rows) {
-                y++;
-                movedSouth = true;
-            }
-        }
-    }
+		public void EAST() {
+			if (x < cols) {
+				x++;
+			}
+		}
 
-    public void mazeLoader() throws FileNotFoundException {
-        Scanner file = new Scanner(new File("maze.txt"));
+		public void WEST() {
+			if (x > 0) {
+				x--;
+			}
+		}
 
-        int rows = 0;
-        int cols = 0;
+		public void NORTH() {
+			if (y > 0) {
+				y--;
+			}
+		}
 
-        // Finds the dimensions of the maze
-        while (file.hasNext()) {
-            String line = file.next();
-            rows++;
-            cols = line.length();
-        }
+		public void SOUTH() {
+			if (y < rows) {
+				y++;
+			}
+		}
+	}
 
-        maze = new char[rows][cols];
+	/*
+	 * mazeLoader creates the 2D array. The maze array is a maze of Position
+	 * objects. Creating the maze in this way allows me to store more information in
+	 * a cell. I can store what the that cell is, and more importantly I can store
+	 * information about the path that I have taken, which prevents the program for
+	 * constantly going back and forth and allows me to backtrack if required.
+	 * 
+	 * This data is stored using the state integer in the Position object. If it is
+	 * 0, then that cell is the starting cell. If it is 1, then it is an open path.
+	 * 2 is a wall and 3 is the end of the maze. 4 represents the "path", which are
+	 * the cells that I went to previously to get to where I am now.
+	 */
 
-        file = new Scanner(new File("maze.txt"));
+	public void mazeLoader() throws FileNotFoundException {
+		Scanner file = new Scanner(new File("maze.txt")); // File with the maze
 
-        // Reads characters into 2D array
-        for (int r = 0; r < rows; r++) {
-            String thisRow = file.next();
-            for (int c = 0; c < cols; c++) {
-                maze[r][c] = thisRow.charAt(c);
-            }
-        }
+		int rows = 0; // @param rows integer
+		int cols = 0; // @param columns integer
 
-        // Finds the start coordinates and loads it into paramaters object
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (maze[i][j] == '$') {
-                    param.setup(i, j, rows, cols);
-                }
-            }
-        }
+		// Sets the rows and cols integer to the dimensions of the maze
+		while (file.hasNext()) {
+			String line = file.next();
+			rows++;
+			cols = line.length();
+		}
 
-        // Launch
-        solveMaze(param.x, param.y);
-    }
+		maze = new Position[rows][cols]; // maze array
 
-    public boolean solveMaze(int x, int y) {
-        Position pos = new Position();
-        pos.setup(x, y, param.rows, param.cols);
+		file = new Scanner(new File("maze.txt")); // Resets the scanner
 
-        if (maze[y][x] == '@') {
-            System.out.println("MAZE SOLVED!");
-            return true;
-        }
+		/*
+		 * This loop initializes every cell in the maze and sets the proper state value
+		 */
 
-        if (y < pos.cols - 1 && x < pos.rows - 1) {
-            pos.EAST();
-            x = pos.x;
-            y = pos.y;
+		for (int i = 0; i < rows; i++) {
+			String thisRow = file.next();
+			for (int j = 0; j < cols; j++) {
 
-            if (maze[y][x] == '.') {
-                System.out.println("MOVING EAST, NEW COORDS ARE : " + x + " + " + y);
-                stack.push(pos);
-                solveMaze(x, y);
+				maze[i][j] = new Position();
+				if (thisRow.equals("$")) {
+					maze[i][j].state = 0;
+					param.setup(i, j, rows, cols); // Passes start value data into Paramaters
+				} else if (thisRow.equals(".")) {
+					maze[i][j].state = 1;
+				} else if (thisRow.equals("#")) {
+					maze[i][j].state = 2;
+				} else if (thisRow.equals("@")) {
+					maze[i][j].state = 3;
+				}
+			}
+		}
 
-            } else if (maze[y][x] == '#') {
-                System.out.println("INVALID SQUARE, CHECKING SOUTH");
-                pos.SOUTH();
-                x = pos.x;
-                y = pos.y;
+		// Launch solveMaze
+		solveMaze(param.x, param.y);
+	}
 
-                if (maze[y][x] == '.') {
-                    System.out.println("MOVING SOUTH, NEW COORDS ARE : " + x + " + " + y);
-                    solveMaze(x, y);
+	/*
+	 * solveMaze is the actual recursion solve method. It works by creating a new
+	 * Position object. The program then will check all directions until it finds a
+	 * valid move. I then sets the x and y coords of that point into the x and y
+	 * integers in the method. The Position object is then pushed onto the stack and
+	 * calls itself, taking in the x and y integers as parameters. This is done
+	 * because a new blank Position object is created each time it runs, so the
+	 * current x and y coords need to be tracked seperately.
+	 */
 
-                } else if (maze[y][x] == '#') {
-                    System.out.println("INVALID SQUARE, CHECKING NORTH");
-                    pos.NORTH();
-                    x = pos.x;
-                    y = pos.y;
+	public boolean solveMaze(int x, int y) {
+		Position pos = new Position(); // Creates new Postion object
+		pos.setup(x, y, param.rows, param.cols); // Sets values of pos
 
-                    if (maze[y][x] == '.') {
-                        System.out.println("MOVING NORTH, NEW COORDS ARE : " + x + " + " + y);
-                        solveMaze(x, y);
+		// Win condition check
+		if (maze[y][x].state == 3) {
+			System.out.println("MAZE SOLVED!");
+			return true;
+		}
 
-                    } else if (maze[y][x] == '#') {
-                        System.out.println("DEAD END! BACKTRACKING...");
-                    }
-                }
+		// EAST
+		if (x < pos.cols - 1 && maze[y][x + 1].state == 2) {
+			pos.EAST();
+			x = pos.x;
+			y = pos.y;
+			System.out.println("MOVING EAST... COORDS ARE : " + x + " + " + y);
+			stack.push(pos);
+			solveMaze(x, y);
 
-            }
+			// WEST
+		} else if (x > 0 && maze[y][x - 1].state == 2) {
+			pos.WEST();
+			x = pos.x;
+			y = pos.y;
+			System.out.println("MOVING WEST... COORDS ARE : " + x + " + " + y);
+			stack.push(pos);
+			solveMaze(x, y);
 
-        } else {
-            System.out.println("OUT OF BOUNDS!");
-        }
+			// SOUTH
+		} else if (y < pos.rows - 1 && maze[y + 1][x].state == 2) {
+			pos.SOUTH();
+			x = pos.x;
+			y = pos.y;
+			System.out.println("MOVING SOUTH... COORDS ARE : " + x + " + " + y);
+			stack.push(pos);
+			solveMaze(x, y);
 
-        return false;
-    }
+			// NORTH
+		} else if (y > 0 && maze[y - 1][x].state == 2) {
+			pos.NORTH();
+			x = pos.x;
+			y = pos.y;
+			System.out.println("MOVING NORTH... COORDS ARE : " + x + " + " + y);
+			stack.push(pos);
+			solveMaze(x, y);
 
-    public static void main(String[] args) {
-        try {
-            new MazeSolver().mazeLoader();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+		} else {
+			System.out.println("DEAD END! BACKTRACKING...");
+		}
+
+		return false;
+	}
+
+	public static void main(String[] args) {
+		try {
+			new MazeSolver().mazeLoader();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 }
