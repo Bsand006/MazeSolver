@@ -1,4 +1,4 @@
-package com.briansandMazeSolver;
+package com.briansand.mazesolver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
