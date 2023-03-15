@@ -25,7 +25,7 @@ public class MazeSolver {
 	 * The paramaters object stores the x and y coordinates of the start location,
 	 * and contains the dimensions of the maze for out of bounds checking.
 	 */
-	
+
 	static class Paramaters {
 		int x;
 		int y;
@@ -46,10 +46,11 @@ public class MazeSolver {
 	 * created, updated, and then pushed onto the stack to keep track of every move
 	 * that has been made.
 	 * 
-	 * The grid used is also a grid of this Position object. This allows me to store if a cell is
-	 * open or not, and to mark the path the program has taken so it can backtrack it needed.
+	 * The grid used is also a grid of this Position object. This allows me to store
+	 * if a cell is open or not, and to mark the path the program has taken so it
+	 * can backtrack it needed.
 	 */
-	
+
 	static class Position {
 		int x;
 		int y;
@@ -100,7 +101,7 @@ public class MazeSolver {
 	 * This data is stored using the state integer in the Position object. If it is
 	 * 0, then that cell is the starting cell. If it is 1, then it is an open path.
 	 * 2 is a wall and 3 is the end of the maze. 4 represents the "path", which are
-	 * the cells that the program took previously to get to where it is  now.
+	 * the cells that the program took previously to get to where it is now.
 	 */
 
 	public void mazeLoader() throws FileNotFoundException {
@@ -126,7 +127,7 @@ public class MazeSolver {
 			String thisRow = file.next();
 			for (int j = 0; j < cols; j++) {
 				maze[i][j] = new Position();
-				if (thisRow.charAt(j) == '$') {
+				if (thisRow.charAt(j) == '@') {
 					maze[i][j].state = 0;
 					param.setup(i, j, rows, cols); // Passes start value data into Paramaters
 					System.out.println("Starting position " + i + "," + j);
@@ -134,7 +135,7 @@ public class MazeSolver {
 					maze[i][j].state = 1;
 				} else if (thisRow.charAt(j) == '#') {
 					maze[i][j].state = 2;
-				} else if (thisRow.charAt(j) == '@') {
+				} else if (thisRow.charAt(j) == '$') {
 					maze[i][j].state = 3;
 					System.out.println("Ending position " + i + "," + j);
 				}
@@ -170,7 +171,7 @@ public class MazeSolver {
 					|| maze[y + 1][x].state == 3) {
 				System.out.println("MAZE SOLVED!");
 				System.out.println("SOLVED IN " + turns + " TURNS");
-				
+
 				return true;
 			}
 		}
@@ -184,7 +185,8 @@ public class MazeSolver {
 			System.out.println("MOVING EAST... COORDS ARE : " + y + " + " + x);
 			turns++;
 			stack.push(pos);
-			solveMaze(x, y);
+			if (solveMaze(x, y))
+				return true;
 
 			// Go west
 		} else if (x > 0 && maze[y][x - 1].state == 1) {
@@ -195,7 +197,8 @@ public class MazeSolver {
 			System.out.println("MOVING WEST... COORDS ARE : " + y + " + " + x);
 			turns++;
 			stack.push(pos);
-			solveMaze(x, y);
+			if (solveMaze(x, y))
+				return true;
 
 			// Go south
 		} else if (y < pos.rows - 1 && maze[y + 1][x].state == 1) {
@@ -206,7 +209,8 @@ public class MazeSolver {
 			System.out.println("MOVING SOUTH... COORDS ARE : " + y + " + " + x);
 			turns++;
 			stack.push(pos);
-			solveMaze(x, y);
+			if (solveMaze(x, y))
+				return true;
 
 			// Go north
 		} else if (y > 0 && maze[y - 1][x].state == 1) {
@@ -217,7 +221,8 @@ public class MazeSolver {
 			System.out.println("MOVING NORTH... COORDS ARE : " + y + " + " + x);
 			turns++;
 			stack.push(pos);
-			solveMaze(x, y);
+			if (solveMaze(x, y))
+				return true;
 
 			// If dead end reached
 		} else {
